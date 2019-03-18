@@ -2,7 +2,6 @@
 
 module Graph.Generator
     ( Connectivity
-    , mkConnectivity
     , genGraph
     ) where
 

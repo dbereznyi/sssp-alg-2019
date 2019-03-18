@@ -114,10 +114,10 @@ mkGraph' numNodes' numEdges' adjLists' weights' =
 
 -- A list of all the nodes in the graph (from 0 to numNodes - 1)
 nodeList :: Graph -> [Node]
-nodeList graph = fmap mkNode [0 .. nodeCount]
+nodeList graph = fmap mkNode [0 .. nodeCount - 1]
     where
         MkNodeCount nodeCount = numNodes graph
 
 -- The nodes for which there is a directed edge pointing from the given node to them
 neighborsOf :: Node -> Graph -> V.Vector Node
-neighborsOf (MkNode nodeIdx) graph = adjLists graph V.! (fromIntegral nodeIdx)
+neighborsOf (MkNode nodeIdx) graph = adjLists graph V.! fromIntegral nodeIdx

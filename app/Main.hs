@@ -1,13 +1,14 @@
 module Main where
 
-import           Control.Monad   (forM, forM_)
+import           Control.Monad       (forM, forM_)
 
-import           System.Random   (randomRIO)
+import qualified Data.HashMap.Strict as HashMap
+import           System.Random       (randomRIO)
 
 import qualified Graph
-import           Graph.Generator (genGraph)
+import           Graph.Generator     (genGraph)
 
-import           Util            (pairMap)
+import           Util                (pairMap)
 
 graphsDir :: FilePath
 graphsDir = "graphs/"

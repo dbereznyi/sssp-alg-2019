@@ -4,9 +4,12 @@
 module Sssp
     ( dijkstra
     , bellmanFord
+    , Distance(..)
     ) where
 
-import           Data.HashMap.Strict (HashMap, (!))
+import           Debug.Trace
+
+import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import           Data.List           (repeat)
 import           Data.PQueue.Min     (MinQueue)
@@ -17,7 +20,7 @@ import           Data.Word           (Word64)
 import           Graph               (Graph, Node, Weight)
 import qualified Graph
 
-import           Util                (for, insertAll)
+import           Util                (for, insertAll, insertAllMQ)
 
 -- A node's distance from the source
 data Distance = MkDistance Word64 | Infinity
@@ -77,19 +80,22 @@ dijkstra graph source = go unvisitedInit distInit prevInit
         go unvisited dist prev =
             if MinQueue.null unvisited
                 then (dist, prev)
-                else go unvisited' dist' prev'
+                else go unvisited'' dist' prev'
             where
                 -- Dequeue the node with the lowest distance estimate
                 (MkNodeDist (u, uDist), unvisited') = MinQueue.deleteFindMin unvisited
 
-                -- Neighboring nodes whose distance estimate was improved
                 improvedEstimates :: V.Vector (Node, Distance)
-                improvedEstimates = V.filter (\(v, newEst) -> newEst < dist ! v) $
+                improvedEstimates = V.filter (\(v, newEst) -> newEst < dist HashMap.! v) $
                     for (Graph.neighborsOf u graph) $ \v ->
                         let edge = Graph.mkEdge u v
-                            weight = Graph.weights graph ! edge
+                            weight = Graph.weights graph HashMap.! edge
                             newEst = distSum uDist (fromWeight weight)
                         in (v, newEst)
+                    
+                -- Update the distance estimates for u's neighbors
+                unvisited'' :: MinQueue NodeDist
+                unvisited'' = insertAllMQ unvisited' (fmap MkNodeDist improvedEstimates)
 
                 -- dist updated with the improved distance estimates
                 dist' :: HashMap Node Distance
@@ -100,6 +106,18 @@ dijkstra graph source = go unvisitedInit distInit prevInit
                 prev' :: HashMap Node Node
                 prev' = insertAll prev $ fmap (\(v, _) -> (v, u)) improvedEstimates
 
-
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
 bellmanFord graph source = undefined
+
+(tg, ts) = (graph, source)
+    where
+        numNodes = 6
+        numEdges = 7
+        adjLists = [[], [0], [1, 3, 4, 5], [], [3, 5], []]
+        weights =
+                [ ((1, 0), 3)
+                , ((2, 1), 2), ((2, 3), 4), ((2, 4), 1), ((2, 5), 7)
+                , ((4, 3), 2), ((4, 5), 3)
+                ]
+        graph = Graph.mkGraph' numNodes numEdges adjLists weights
+        source = Graph.mkNode 2
