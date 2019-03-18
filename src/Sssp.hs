@@ -7,8 +7,6 @@ module Sssp
     , Distance(..)
     ) where
 
-import           Debug.Trace
-
 import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import           Data.List           (repeat)
@@ -108,16 +106,3 @@ dijkstra graph source = go unvisitedInit distInit prevInit
 
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
 bellmanFord graph source = undefined
-
-(tg, ts) = (graph, source)
-    where
-        numNodes = 6
-        numEdges = 7
-        adjLists = [[], [0], [1, 3, 4, 5], [], [3, 5], []]
-        weights =
-                [ ((1, 0), 3)
-                , ((2, 1), 2), ((2, 3), 4), ((2, 4), 1), ((2, 5), 7)
-                , ((4, 3), 2), ((4, 5), 3)
-                ]
-        graph = Graph.mkGraph' numNodes numEdges adjLists weights
-        source = Graph.mkNode 2
