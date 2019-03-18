@@ -118,6 +118,6 @@ nodeList graph = fmap mkNode [0 .. nodeCount - 1]
     where
         MkNodeCount nodeCount = numNodes graph
 
--- The nodes for which there is a directed edge pointing from the given node to them
+-- The nodes reachable from a given node
 neighborsOf :: Node -> Graph -> V.Vector Node
 neighborsOf (MkNode nodeIdx) graph = adjLists graph V.! fromIntegral nodeIdx
