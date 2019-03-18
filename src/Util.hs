@@ -26,6 +26,6 @@ for = flip fmap
 insertAll :: (Eq k, Hashable k, Foldable f) => HashMap k v -> f (k, v) -> HashMap k v
 insertAll = foldr (uncurry HashMap.insert)
 
--- Insert multiple key/value pairs into a MinQueue
+-- Insert multiple values into a MinQueue
 insertAllMQ :: (Ord a, Foldable f) => MinQueue a -> f a -> MinQueue a
 insertAllMQ = foldr MinQueue.insert
