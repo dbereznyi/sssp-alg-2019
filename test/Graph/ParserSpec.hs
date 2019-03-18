@@ -13,7 +13,7 @@ import           Graph.Parser        (graphParser)
 import qualified Graph
 
 spec :: Spec
-spec = describe "Graph.Parser" $ do
+spec = describe "Graph.Parser" $
     describe "graphParser" $ do
         let txt = "4, 5\n1 1\n2 2\n3 3\n0 4 1 5"
         let result = runST $ runParserT graphParser HashMap.empty "" txt
