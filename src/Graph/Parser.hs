@@ -30,14 +30,12 @@ graphParser = do
         lineP i adjLists
 
     adjListsImm <- lift (V.unsafeFreeze adjLists)
-    weights <- getState
 
-    return $
-        Graph.mkGraph
-            (Graph.mkNodeCount numNodes)
-            (Graph.mkEdgeCount numEdges)
-            adjListsImm
-            weights
+    Graph.mkGraph
+        (Graph.mkNodeCount numNodes)
+        (Graph.mkEdgeCount numEdges)
+        adjListsImm
+        <$> getState
 
     where
         intP :: ParsecT Text u (ST s) Int

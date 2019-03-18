@@ -1,5 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 -- Algorithms for solving the Single-source Shortest Path problem
 module Sssp
     ( dijkstra
