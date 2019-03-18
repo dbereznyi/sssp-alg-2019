@@ -6,7 +6,7 @@ module Graph
     , fromFile
     , toText
     , toFile
-    , module Graph.Type
+    , module Graph.Types
     ) where
 
 import           Text.Parsec         (runParserT)
@@ -21,7 +21,7 @@ import qualified Data.Vector         as V
 import           Control.Monad.ST    (runST)
 
 import           Graph.Parser
-import           Graph.Type
+import           Graph.Types
 
 fromText :: Text -> Graph
 fromText contents =

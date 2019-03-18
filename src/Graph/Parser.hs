@@ -3,8 +3,8 @@ module Graph.Parser
     ( graphParser
     ) where
 
-import           Graph.Type                (Edge, Graph, Node, Weight)
-import qualified Graph.Type                as Graph
+import           Graph.Types               (Edge, Graph, Node, Weight)
+import qualified Graph.Types               as Graph
 
 import           Text.Parsec
 

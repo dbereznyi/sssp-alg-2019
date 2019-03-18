@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 -- Defines the weighted digraph used in the Single-source Shortest Path problem
-module Graph.Type
+module Graph.Types
     ( Node
     , mkNode
 

@@ -6,6 +6,7 @@ import qualified Data.HashMap.Strict as HashMap
 
 import qualified Graph
 import qualified Sssp
+import qualified Sssp.Distance       as Distance
 import           Util                (pairMap, pairMap')
 
 spec :: Spec
@@ -21,7 +22,7 @@ spec = describe "Sssp" $ do
     let graph = Graph.mkGraph' numNodes numEdges adjLists weights
     let source = Graph.mkNode 2
 
-    let distExpected = HashMap.fromList $ fmap (pairMap Graph.mkNode Sssp.MkDistance)
+    let distExpected = HashMap.fromList $ fmap (pairMap Graph.mkNode Distance.new)
             [(0, 5), (1, 2), (2, 0), (3, 3), (4, 1), (5, 4)]
 
     let prevExpected = HashMap.fromList $ fmap (pairMap' Graph.mkNode)

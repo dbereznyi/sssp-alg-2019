@@ -19,8 +19,8 @@ import           Control.Monad       (forM_, when)
 
 import           System.Random       (randomIO, randomRIO)
 
-import           Graph.Type          (Edge, Graph, Node, NodeCount, Weight)
-import qualified Graph.Type          as Graph
+import           Graph.Types         (Edge, Graph, Node, NodeCount, Weight)
+import qualified Graph.Types         as Graph
 
 newtype Connectivity = MkConnectivity Double
     deriving (Eq, Num, Fractional, Floating, Real, RealFrac, Ord)
