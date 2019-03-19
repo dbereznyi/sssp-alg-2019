@@ -12,10 +12,10 @@ import           Data.PQueue.Min     (MinQueue)
 import qualified Data.PQueue.Min     as MinQueue
 import qualified Data.Vector         as V
 
-import           Graph               (Graph, Node, Weight)
+import           Graph               (Edge, Graph, Node, Weight)
 import qualified Graph
 
-import           Util                (for, insertAll, insertAllMQ)
+import           Util                (for, insertAll, insertAllMQ, pairMap')
 
 import           Sssp.Distance       (Distance)
 import qualified Sssp.Distance       as Distance
@@ -76,4 +76,40 @@ dijkstra graph source = go unvisitedInit distInit prevInit
                 prev' = insertAll prev $ fmap (\(v, _) -> (v, u)) improvedEstimates
 
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
-bellmanFord graph source = undefined
+bellmanFord graph source = go 1 distInit prevInit
+    where
+        -- The initial distance estimate for each node
+        -- The distance of the source is set to 0, and every other node is set to Infinity
+        distInit :: HashMap Node Distance
+        distInit = HashMap.fromList $
+            (source, Distance.new 0) : zip nonSourceNodes (repeat Distance.infinity)
+            where
+                nonSourceNodes = filter (/= source) (Graph.nodeList graph)
+
+        prevInit :: HashMap Node Node
+        prevInit = HashMap.empty
+
+        go :: Int
+            -> HashMap Node Distance
+            -> HashMap Node Node
+            -> (HashMap Node Distance, HashMap Node Node)
+        go i dist prev =
+            if i == fromIntegral (Graph.numNodes graph)
+                then (dist, prev)
+                else go (i + 1) dist' prev'
+            where
+                relax :: (Edge, Weight) -> Maybe ((Node, Distance), (Node, Node))
+                relax (edge, weight) =
+                    if newEst < vDist
+                        then Just ((v, newEst), (v, u))
+                        else Nothing
+                    where
+                        (u, v) = Graph.unwrapEdge edge
+                        (uDist, vDist) = (dist HashMap.! u, dist HashMap.! v)
+                        newEst = Distance.add uDist (Distance.new weight)
+
+                updates = V.mapMaybe relax (Graph.edgeWeightPairs graph)
+                
+                dist' = insertAll dist (fmap fst updates)
+                prev' = insertAll prev (fmap snd updates)
+

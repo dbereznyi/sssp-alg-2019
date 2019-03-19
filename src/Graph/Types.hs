@@ -10,6 +10,7 @@ module Graph.Types
 
     , Edge
     , mkEdge
+    , unwrapEdge
 
     , NodeCount
     , mkNodeCount
@@ -25,6 +26,7 @@ module Graph.Types
     , mkGraph
     , mkGraph'
     , nodeList
+    , edgeWeightPairs
     , neighborsOf
     ) where
 
@@ -34,7 +36,7 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Vector         as V
 import           Data.Word           (Word64)
 
-import           Util                (pairMap, pairMap')
+import           Util                (for, pairMap, pairMap')
 
 -- Type aliases
 
@@ -64,6 +66,9 @@ instance Show Edge where
 
 mkEdge :: Node -> Node -> Edge
 mkEdge = curry MkEdge
+
+unwrapEdge :: Edge -> (Node, Node)
+unwrapEdge (MkEdge pair) = pair
 
 newtype NodeCount = MkNodeCount Word64
     deriving (Eq, Num, Ord, Real, Integral, Enum)
@@ -117,6 +122,15 @@ nodeList :: Graph -> [Node]
 nodeList graph = fmap mkNode [0 .. nodeCount - 1]
     where
         MkNodeCount nodeCount = numNodes graph
+
+-- A vector of every edge in the graph paired with its weight
+-- Convenient for iterating over all the edges in the graph
+edgeWeightPairs :: Graph -> V.Vector (Edge, Weight)
+edgeWeightPairs graph =
+    V.concatMap (\(u, vs) -> toEdgeWeight (mkNode u) <$> vs) (V.indexed $ adjLists graph)
+    where
+        toEdgeWeight :: Node -> Node -> (Edge, Weight)
+        toEdgeWeight u v = let edge = mkEdge u v in (edge, weights graph HashMap.! edge)
 
 -- The nodes reachable from a given node
 neighborsOf :: Node -> Graph -> V.Vector Node
