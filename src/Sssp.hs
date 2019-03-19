@@ -55,8 +55,6 @@ dijkstra graph source = go unvisitedInit distInit HashMap.empty
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
 bellmanFord graph source = go 1 distInit HashMap.empty
     where
-        -- The initial distance estimate for each node
-        -- The distance of the source is set to 0, and every other node is set to Infinity
         distInit :: HashMap Node Distance
         distInit = HashMap.fromList (nodeDistPairsInit graph source)
 
