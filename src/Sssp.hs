@@ -2,7 +2,6 @@
 module Sssp
     ( dijkstra
     , bellmanFord
-    , Distance(..)
     ) where
 
 import           Data.HashMap.Strict (HashMap)
@@ -23,24 +22,14 @@ import           Sssp.NodeDist       (NodeDist)
 import qualified Sssp.NodeDist       as NodeDist
 
 dijkstra :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
-dijkstra graph source = go unvisitedInit distInit prevInit
+dijkstra graph source = go unvisitedInit distInit HashMap.empty
     where
-        -- The initial distance estimate for each node
-        -- The distance of the source is set to 0, and every other node is set to Infinity
-        nodeDistPairsInit :: [(Node, Distance)]
-        nodeDistPairsInit = (source, Distance.new 0) : zip nonSourceNodes (repeat Distance.infinity)
-            where
-                nonSourceNodes = filter (/= source) (Graph.nodeList graph)
-
         -- A minimum priority queue of nodes indexed by their estimated distance from the source
         unvisitedInit :: MinQueue NodeDist
-        unvisitedInit = MinQueue.fromList (fmap NodeDist.Mk nodeDistPairsInit)
+        unvisitedInit = MinQueue.fromList (fmap NodeDist.Mk (nodeDistPairsInit graph source))
 
         distInit :: HashMap Node Distance
-        distInit = HashMap.fromList nodeDistPairsInit
-
-        prevInit :: HashMap Node Node
-        prevInit = HashMap.empty
+        distInit = HashMap.fromList (nodeDistPairsInit graph source)
 
         go :: MinQueue NodeDist
             -> HashMap Node Distance
@@ -51,43 +40,25 @@ dijkstra graph source = go unvisitedInit distInit prevInit
                 then (dist, prev)
                 else go unvisited'' dist' prev'
             where
-                -- Dequeue the node with the lowest distance estimate
-                (NodeDist.Mk (u, uDist), unvisited') = MinQueue.deleteFindMin unvisited
+                -- The node with the lowest distance estimate is dequeued
+                (NodeDist.Mk (u, _), unvisited') = MinQueue.deleteFindMin unvisited
 
-                improvedEstimates :: V.Vector (Node, Distance)
-                improvedEstimates = V.filter (\(v, newEst) -> newEst < dist HashMap.! v) $
-                    for (Graph.neighborsOf u graph) $ \v ->
-                        let edge = Graph.mkEdge u v
-                            weight = Graph.weights graph HashMap.! edge
-                            newEst = Distance.add uDist (Distance.new weight)
-                        in (v, newEst)
+                -- Updates to distance estimates and predecessors
+                updates :: V.Vector ((Node, Distance), (Node, Node))
+                updates = V.mapMaybe (relax dist) (Graph.adjEdgeWeightPairs u graph)
 
-                -- Update the distance estimates for u's neighbors
-                unvisited'' :: MinQueue NodeDist
-                unvisited'' = insertAllMQ unvisited' (fmap NodeDist.Mk improvedEstimates)
-
-                -- dist updated with the improved distance estimates
-                dist' :: HashMap Node Distance
-                dist' = insertAll dist improvedEstimates
-
-                -- The current node is the predecessor for every neighbor whose
-                -- distance estimate was improved
-                prev' :: HashMap Node Node
-                prev' = insertAll prev $ fmap (\(v, _) -> (v, u)) improvedEstimates
+                -- Apply the updates
+                unvisited'' = insertAllMQ unvisited' (fmap (NodeDist.Mk . fst) updates)
+                dist' = insertAll dist (fmap fst updates)
+                prev' = insertAll prev (fmap snd updates)
 
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
-bellmanFord graph source = go 1 distInit prevInit
+bellmanFord graph source = go 1 distInit HashMap.empty
     where
         -- The initial distance estimate for each node
         -- The distance of the source is set to 0, and every other node is set to Infinity
         distInit :: HashMap Node Distance
-        distInit = HashMap.fromList $
-            (source, Distance.new 0) : zip nonSourceNodes (repeat Distance.infinity)
-            where
-                nonSourceNodes = filter (/= source) (Graph.nodeList graph)
-
-        prevInit :: HashMap Node Node
-        prevInit = HashMap.empty
+        distInit = HashMap.fromList (nodeDistPairsInit graph source)
 
         go :: Int
             -> HashMap Node Distance
@@ -98,18 +69,29 @@ bellmanFord graph source = go 1 distInit prevInit
                 then (dist, prev)
                 else go (i + 1) dist' prev'
             where
-                relax :: (Edge, Weight) -> Maybe ((Node, Distance), (Node, Node))
-                relax (edge, weight) =
-                    if newEst < vDist
-                        then Just ((v, newEst), (v, u))
-                        else Nothing
-                    where
-                        (u, v) = Graph.unwrapEdge edge
-                        (uDist, vDist) = (dist HashMap.! u, dist HashMap.! v)
-                        newEst = Distance.add uDist (Distance.new weight)
+                -- Updates to distance estimates and predecessors
+                updates :: V.Vector ((Node, Distance), (Node, Node))
+                updates = V.mapMaybe (relax dist) (Graph.edgeWeightPairs graph)
 
-                updates = V.mapMaybe relax (Graph.edgeWeightPairs graph)
-                
+                -- Apply the updates
                 dist' = insertAll dist (fmap fst updates)
                 prev' = insertAll prev (fmap snd updates)
 
+-- The initial distance estimate for each node
+-- The distance of the source is set to 0, and every other node is set to Infinity
+nodeDistPairsInit :: Graph -> Node -> [(Node, Distance)]
+nodeDistPairsInit graph source = 
+    (source, Distance.new 0) : zip nonSourceNodes (repeat Distance.infinity)
+    where
+        nonSourceNodes = filter (/= source) (Graph.nodeList graph)
+
+-- Tries to improve the distance estimate for the endpoint of the given edge
+relax :: HashMap Node Distance -> (Edge, Weight) -> Maybe ((Node, Distance), (Node, Node))
+relax dist (edge, weight) =
+    if newEst < vDist
+        then Just ((v, newEst), (v, u))
+        else Nothing
+    where
+        (u, v) = Graph.unwrapEdge edge
+        (uDist, vDist) = (dist HashMap.! u, dist HashMap.! v)
+        newEst = Distance.add uDist (Distance.new weight)

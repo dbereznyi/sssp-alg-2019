@@ -26,8 +26,11 @@ module Graph.Types
     , mkGraph
     , mkGraph'
     , nodeList
+    , toEdgeWeight
     , edgeWeightPairs
     , neighborsOf
+    , adjEdgeWeightPairs
+    , weightOf
     ) where
 
 import           Data.Hashable       (Hashable)
@@ -123,15 +126,25 @@ nodeList graph = fmap mkNode [0 .. nodeCount - 1]
     where
         MkNodeCount nodeCount = numNodes graph
 
+-- Converts a pair of Nodes to an Edge paired with its Weight
+toEdgeWeight :: Graph -> Node -> Node -> (Edge, Weight)
+toEdgeWeight graph u v = let edge = mkEdge u v in (edge, weights graph HashMap.! edge)
+
 -- A vector of every edge in the graph paired with its weight
 -- Convenient for iterating over all the edges in the graph
 edgeWeightPairs :: Graph -> V.Vector (Edge, Weight)
 edgeWeightPairs graph =
-    V.concatMap (\(u, vs) -> toEdgeWeight (mkNode u) <$> vs) (V.indexed $ adjLists graph)
-    where
-        toEdgeWeight :: Node -> Node -> (Edge, Weight)
-        toEdgeWeight u v = let edge = mkEdge u v in (edge, weights graph HashMap.! edge)
+    V.concatMap (\(u, vs) -> toEdgeWeight graph (mkNode u) <$> vs) (V.indexed $ adjLists graph)
 
 -- The nodes reachable from a given node
 neighborsOf :: Node -> Graph -> V.Vector Node
 neighborsOf (MkNode nodeIdx) graph = adjLists graph V.! fromIntegral nodeIdx
+
+-- Edges adjacent to the current node (i.e. can be travelled along from the current node) 
+-- paired with their weights
+-- Convenient for iterating over edges to adjacent nodes
+adjEdgeWeightPairs :: Node -> Graph -> V.Vector (Edge, Weight)
+adjEdgeWeightPairs u graph = fmap (toEdgeWeight graph u) (neighborsOf u graph)
+
+weightOf :: Edge -> Graph -> Weight
+weightOf edge graph = weights graph HashMap.! edge
