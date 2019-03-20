@@ -4,10 +4,31 @@ Implements Dijkstra and Bellman-Ford algorithms to solve single-source shortest 
 
 Inquiries/complaints: don't care
 
+## Setup
+
+1. Get `stack` from [here](https://docs.haskellstack.org/en/stable/README/)
+2. Download this project as a zip and extract it to a directory
+3. `cd` to that directory in a terminal
+4. Run `stack setup`
+
+## Building
+
+```
+stack build
+```
+
+## Running
+
+Running the executable will benchmark each SSSP algorithm (Dijkstra and Bellman Ford).
+
+To run the benchmarks with 1000 iterations and output the results to `results.html`:
+```
+stack exec -- sssp-exe -n 1000 --output results.html
+```
+
 ## Testing
 
+To run some unit tests:
 ```
 stack test
 ```
-
-Hopefully, the tests pass.
