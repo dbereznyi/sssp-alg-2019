@@ -78,7 +78,7 @@ bellmanFord graph source = go 1 distInit HashMap.empty
 -- The initial distance estimate for each node
 -- The distance of the source is set to 0, and every other node is set to Infinity
 nodeDistPairsInit :: Graph -> Node -> [(Node, Distance)]
-nodeDistPairsInit graph source = 
+nodeDistPairsInit graph source =
     (source, Distance.new 0) : zip nonSourceNodes (repeat Distance.infinity)
     where
         nonSourceNodes = filter (/= source) (Graph.nodeList graph)

@@ -31,6 +31,9 @@ dependencies:
 - QuickCheck
 - random
 - pqueue
+- parallel
+- clock
+- criterion
 
 library:
   source-dirs: src

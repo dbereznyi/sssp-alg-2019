@@ -1,14 +1,27 @@
 module Main where
 
-import           Control.Monad       (forM, forM_)
+import qualified Criterion.Main              as Crit
 
-import qualified Data.HashMap.Strict as HashMap
-import           System.Random       (randomRIO)
+import           Control.Exception           (evaluate)
+import           Control.Monad               (forM, forM_, replicateM_)
+import           Control.Parallel.Strategies (NFData, rdeepseq)
 
+import           Data.HashMap.Strict         (HashMap)
+import qualified Data.HashMap.Strict         as HashMap
+
+import           Text.Printf                 (printf)
+
+import           System.CPUTime              (getCPUTime)
+import           System.Random               (randomRIO)
+
+import           Graph                       (Graph, Node, NodeCount)
 import qualified Graph
-import           Graph.Generator     (genGraph)
+import           Graph.Generator             (genGraph)
 
-import           Util                (pairMap)
+import qualified Sssp
+import           Sssp.Distance               (Distance)
+
+import           Util                        (pairMap)
 
 graphsDir :: FilePath
 graphsDir = "graphs/"
@@ -19,16 +32,34 @@ toGraphPath numNodes = graphsDir <> "graph_" <> show numNodes <> ".txt"
 main :: IO ()
 main = do
     inputs <- getInputs
-    mapM_ (print . pairMap Graph.numNodes id) inputs
+    Crit.defaultMain (benchmarks inputs)
+
+-- The benchmarks to run on the SSSP algorithms
+-- There are 10 groups: one for each input size
+-- In each group are two benchmarks: one for Dijkstra and one for Bellman Ford
+benchmarks :: [(Graph, Node)] -> [Crit.Benchmark]
+benchmarks = fmap toBenchGroup
+    where
+        toBenchGroup :: (Graph, Node) -> Crit.Benchmark
+        toBenchGroup (graph, source) =
+            let numNodes = Graph.numNodes graph
+                numEdges = Graph.numEdges graph
+                groupName = show numNodes ++ "N," ++ show numEdges ++ "E"
+                toBench algName alg = Crit.bench algName $ Crit.nf (alg graph) source
+
+            in Crit.bgroup groupName
+                [ toBench "dijkstra" Sssp.dijkstra
+                , toBench "bellmanFord" Sssp.bellmanFord
+                ]
 
 -- Reads input graphs and randomly selects a source vertex for each
-getInputs :: IO [(Graph.Graph, Graph.Node)]
+getInputs :: IO [(Graph, Node)]
 getInputs = forM [100,200..1000] $ \numNodes -> do
     graph <- Graph.fromFile (toGraphPath numNodes)
     source <- Graph.mkNode <$> randomRIO (0, fromIntegral $ numNodes - 1 :: Int)
     return (graph, source)
 
--- Generates 10 graphs ranging from 100 to 1000 nodes in size and write them to disk
+-- Generates 10 graphs ranging from 100 to 1000 nodes in size and writes them to disk
 -- Only needs to be called once
 generateGraphs :: IO ()
 generateGraphs = forM_ [100,200..1000] $ \numNodes -> do

@@ -33,18 +33,20 @@ module Graph.Types
     , weightOf
     ) where
 
-import           Data.Hashable       (Hashable)
-import           Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
-import qualified Data.Vector         as V
-import           Data.Word           (Word64)
+import           Control.Parallel.Strategies (NFData)
 
-import           Util                (for, pairMap, pairMap')
+import           Data.Hashable               (Hashable)
+import           Data.HashMap.Strict         (HashMap)
+import qualified Data.HashMap.Strict         as HashMap
+import qualified Data.Vector                 as V
+import           Data.Word                   (Word64)
+
+import           Util                        (for, pairMap, pairMap')
 
 -- Type aliases
 
 newtype Node = MkNode Word64
-    deriving (Eq, Hashable)
+    deriving (Eq, Hashable, NFData)
 
 instance Show Node where
     show (MkNode val) = show val
@@ -140,7 +142,7 @@ edgeWeightPairs graph =
 neighborsOf :: Node -> Graph -> V.Vector Node
 neighborsOf (MkNode nodeIdx) graph = adjLists graph V.! fromIntegral nodeIdx
 
--- Edges adjacent to the current node (i.e. can be travelled along from the current node) 
+-- Edges adjacent to the current node (i.e. can be travelled along from the current node)
 -- paired with their weights
 -- Convenient for iterating over edges to adjacent nodes
 adjEdgeWeightPairs :: Node -> Graph -> V.Vector (Edge, Weight)
