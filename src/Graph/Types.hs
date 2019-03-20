@@ -33,15 +33,15 @@ module Graph.Types
     , weightOf
     ) where
 
-import           Control.Parallel.Strategies (NFData)
+import           Control.DeepSeq     (NFData)
 
-import           Data.Hashable               (Hashable)
-import           Data.HashMap.Strict         (HashMap)
-import qualified Data.HashMap.Strict         as HashMap
-import qualified Data.Vector                 as V
-import           Data.Word                   (Word64)
+import           Data.Hashable       (Hashable)
+import           Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Vector         as V
+import           Data.Word           (Word64)
 
-import           Util                        (for, pairMap, pairMap')
+import           Util                (for, pairMap, pairMap')
 
 -- Type aliases
 

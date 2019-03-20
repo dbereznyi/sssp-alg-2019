@@ -31,9 +31,9 @@ dependencies:
 - QuickCheck
 - random
 - pqueue
-- parallel
 - clock
 - criterion
+- deepseq
 
 library:
   source-dirs: src

@@ -8,11 +8,11 @@ module Sssp.Distance
     , add
     ) where
 
-import           Control.Parallel.Strategies (NFData)
-import           GHC.Generics                (Generic)
+import           Control.DeepSeq (NFData)
+import           GHC.Generics    (Generic)
 
-import           Data.Word                   (Word64)
-import           Graph.Types                 (Weight)
+import           Data.Word       (Word64)
+import           Graph.Types     (Weight)
 
 -- A node's distance from the source
 data Distance = MkDistance Word64 | Infinity
