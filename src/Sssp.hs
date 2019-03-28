@@ -53,7 +53,7 @@ dijkstra graph source = go unvisitedInit distInit HashMap.empty
                 prev' = insertAll prev (fmap snd updates)
 
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
-bellmanFord graph source = go 1 distInit HashMap.empty
+bellmanFord graph source = go 0 distInit HashMap.empty
     where
         distInit :: HashMap Node Distance
         distInit = HashMap.fromList (nodeDistPairsInit graph source)
@@ -63,9 +63,9 @@ bellmanFord graph source = go 1 distInit HashMap.empty
             -> HashMap Node Node
             -> (HashMap Node Distance, HashMap Node Node)
         go i dist prev =
-            if i == fromIntegral (Graph.numNodes graph)
-                then (dist, prev)
-                else go (i + 1) dist' prev'
+            if i < fromIntegral (Graph.numNodes graph)
+                then go (i + 1) dist' prev'
+                else (dist, prev)
             where
                 -- Updates to distance estimates and predecessors
                 updates :: V.Vector ((Node, Distance), (Node, Node))
@@ -84,7 +84,9 @@ nodeDistPairsInit graph source =
         nonSourceNodes = filter (/= source) (Graph.nodeList graph)
 
 -- Tries to improve the distance estimate for the endpoint of the given edge
-relax :: HashMap Node Distance -> (Edge, Weight) -> Maybe ((Node, Distance), (Node, Node))
+relax :: HashMap Node Distance 
+    -> (Edge, Weight) 
+    -> Maybe ((Node, Distance), (Node, Node))
 relax dist (edge, weight) =
     if newEst < vDist
         then Just ((v, newEst), (v, u))
