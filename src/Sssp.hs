@@ -14,7 +14,7 @@ import qualified Data.Vector         as V
 import           Graph               (Edge, Graph, Node, Weight)
 import qualified Graph
 
-import           Util                (for, insertAll, insertAllMQ, pairMap')
+import qualified Util
 
 import           Sssp.Distance       (Distance)
 import qualified Sssp.Distance       as Distance
@@ -48,9 +48,9 @@ dijkstra graph source = go unvisitedInit distInit HashMap.empty
                 updates = V.mapMaybe (relax dist) (Graph.adjEdgeWeightPairs u graph)
 
                 -- Apply the updates
-                unvisited'' = insertAllMQ unvisited' (fmap (NodeDist.Mk . fst) updates)
-                dist' = insertAll dist (fmap fst updates)
-                prev' = insertAll prev (fmap snd updates)
+                unvisited'' = Util.insertAllMQ unvisited' (fmap (NodeDist.Mk . fst) updates)
+                dist' = Util.insertAll dist (fmap fst updates)
+                prev' = Util.insertAll prev (fmap snd updates)
 
 bellmanFord :: Graph -> Node -> (HashMap Node Distance, HashMap Node Node)
 bellmanFord graph source = go 1 distInit HashMap.empty
@@ -72,8 +72,8 @@ bellmanFord graph source = go 1 distInit HashMap.empty
                 updates = V.mapMaybe (relax dist) (Graph.edgeWeightPairs graph)
 
                 -- Apply the updates
-                dist' = insertAll dist (fmap fst updates)
-                prev' = insertAll prev (fmap snd updates)
+                dist' = Util.insertAll dist (fmap fst updates)
+                prev' = Util.insertAll prev (fmap snd updates)
 
 -- The initial distance estimate for each node
 -- The distance of the source is set to 0, and every other node is set to Infinity
