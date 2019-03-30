@@ -47,25 +47,6 @@ toBenchGroup (graph, source) =
         , toBench "bellmanFord" Sssp.bellmanFord
         ]
 
--- runExperiments :: [(Graph, Node)] -> IO ()
--- runExperiments inputs = forM_ inputs $ \(g, s) -> do
---     printf "Input: %s nodes, %s edges\n" (show $ Graph.numNodes g) (show $ Graph.numEdges g)
-
---     printf "\tDijkstra:\t"
---     time (Sssp.dijkstra g) s >>= evaluate . force
-
---     printf "\tBellman:\t"
---     time (Sssp.bellmanFord g) s >>= evaluate . force
-
--- time :: NFData b => (a -> b) -> a -> IO [b]
--- time f x = do
---     start <- getCPUTime
---     results <- replicateM 100000 $ evaluate $ force $ (f x)
---     end <- getCPUTime
---     let diff = (fromIntegral (end - start)) / (10^3)
---     printf "%0.6f nanosec\n" (diff / 100000 :: Double)
---     return results
-
 -- Reads input graphs and randomly selects a source vertex for each
 getInputs :: IO [(Graph, Node)]
 getInputs = forM [100,200..1000] $ \numNodes -> do
