@@ -1,14 +1,14 @@
 module Main where
 
-import qualified Criterion.Main      as Crit
+import qualified Criterion.Main  as Crit
 
-import           Control.Monad       (forM, forM_)
+import           Control.Monad   (forM, forM_)
 
-import           System.Random       (randomRIO)
+import           System.Random   (randomRIO)
 
-import           Graph               (Graph, Node, NodeCount)
+import           Graph           (Graph, Node, NodeCount)
 import qualified Graph
-import           Graph.Generator     (genGraph)
+import           Graph.Generator (genGraph)
 
 import qualified Sssp
 
@@ -47,7 +47,6 @@ getInputs = forM [100,200..1000] $ \numNodes -> do
 -- Only needs to be called once
 generateGraphs :: IO ()
 generateGraphs = forM_ [100,200..1000] $ \numNodes -> do
+    let connectivity = 0.05
     graph <- genGraph numNodes connectivity
     Graph.toFile (toGraphPath numNodes) graph
-    where
-        connectivity = 0.05
