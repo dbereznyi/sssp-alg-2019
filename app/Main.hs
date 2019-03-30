@@ -39,7 +39,7 @@ toBenchGroup :: (Graph, Node) -> Crit.Benchmark
 toBenchGroup (graph, source) =
     let numNodes = Graph.numNodes graph
         numEdges = Graph.numEdges graph
-        groupName = show numNodes ++ "N," ++ show numEdges ++ "E"
+        groupName = show numNodes <> "N," <> show numEdges <> "E"
         toBench algName alg = Crit.bench algName $ Crit.nf (alg graph) source
 
     in Crit.bgroup groupName
