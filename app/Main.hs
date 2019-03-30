@@ -2,16 +2,8 @@ module Main where
 
 import qualified Criterion.Main      as Crit
 
-import           Control.DeepSeq     (NFData, deepseq, force, rnf)
-import           Control.Exception   (evaluate)
-import           Control.Monad       (forM, forM_, replicateM)
+import           Control.Monad       (forM, forM_)
 
-import           Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
-
-import           Text.Printf         (printf)
-
-import           System.CPUTime      (getCPUTime)
 import           System.Random       (randomRIO)
 
 import           Graph               (Graph, Node, NodeCount)
@@ -19,14 +11,11 @@ import qualified Graph
 import           Graph.Generator     (genGraph)
 
 import qualified Sssp
-import           Sssp.Distance       (Distance)
-
-import           Util                (pairMap)
 
 graphsDir :: FilePath
 graphsDir = "graphs/"
 
-toGraphPath :: Graph.NodeCount -> FilePath
+toGraphPath :: NodeCount -> FilePath
 toGraphPath numNodes = graphsDir <> "graph_" <> show numNodes <> ".txt"
 
 main :: IO ()
